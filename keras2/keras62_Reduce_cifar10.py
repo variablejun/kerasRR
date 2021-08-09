@@ -40,18 +40,24 @@ y_train = OE.transform(y_train).toarray()
 model = Sequential()
 model.add(Conv1D(128,2,activation = 'relu',input_shape=(32,32,3)))
 model.add(Flatten())
+model.add(Dense(256,activation='relu'))
+model.add(Dense(128,activation='relu'))
 model.add(Dense(64,activation='relu'))
 model.add(Dense(32,activation='relu'))
 model.add(Dense(16,activation='relu'))
 model.add(Dense(8,activation='relu'))
 model.add(Dense(10, activation='sigmoid')) 
+from tensorflow.keras.optimizers import Adam
+optimizer = Adam(lr=0.1)
 
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 es = EarlyStopping(monitor='val_accuracy', patience=30, mode='max', verbose=3)
+reduce_LR = ReduceLROnPlateau(monitor='val_loss',patience=5,mode='auto',verbose=1,factor=0.5) 
+
 import time
 starttime = time.time()
-model.compile(loss = 'categorical_crossentropy', optimizer = 'adam', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=100, batch_size=256, validation_split=0.003, verbose=2,callbacks=[es]) 
+model.compile(loss = 'categorical_crossentropy', optimizer = optimizer, metrics=['accuracy'])
+model.fit(x_train, y_train, epochs=100, batch_size=256, validation_split=0.003, verbose=2,callbacks=[es,reduce_LR]) 
 loss = model.evaluate(x_test, y_test) 
 end = time.time()- starttime
 
@@ -59,14 +65,14 @@ print("걸린시간", end)
 print('loss : ', loss[0])
 print('accuracy : ', loss[1])
 '''
- epochs=20
-걸린시간 16.315703868865967
-loss :  2.3025879859924316
-accuracy :  0.10000000149011612
 
 epochs=100
 걸린시간 60.926353216171265
 loss :  3.089942216873169
 accuracy :  0.47909998893737793
 
+Adam적용후 연산수도 늘림
+걸린시간 135.917866230011
+loss :  2.3034298419952393
+accuracy :  0.10000000149011612
 '''
